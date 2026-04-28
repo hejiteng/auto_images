@@ -1,5 +1,84 @@
-# Vue 3 + TypeScript + Vite
+# 施工图质检标注训练系统
 
-This template should help get you started developing with Vue 3 and TypeScript in Vite. The template uses Vue 3 `<script setup>` SFCs, check out the [script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup) to learn more.
+一个基于 Vue 3 + Konva.js 的施工图质检标注训练平台。用户通过圈出施工照片中的问题区域进行练习，系统根据 IoU 算法自动评分。
 
-Learn more about the recommended Project Setup and IDE Support in the [Vue Docs TypeScript Guide](https://vuejs.org/guide/typescript/overview.html#project-setup).
+## 功能特性
+
+### 答题模式
+- 浏览施工照片，鼠标拖拽画圈标出问题区域（矩形辅助框 + 内切圆预览）
+- 提交后自动对比预设标注，计算 IoU 匹配得分
+- 实时显示命中、遗漏、误标结果及用时
+
+### 管理模式
+- 上传本地图片到系统
+- 在图片上画圈创建预设标注（填写问题描述、严重程度、详细解释）
+- 管理图片和标注列表，支持删除操作
+
+### 调试模式
+- 绿色虚线显示预设标注范围
+- 红色实线显示用户绘制圆
+- 提交后实时展示 IoU 值和匹配结果，方便调整判定阈值
+
+## 技术栈
+
+| 技术 | 说明 |
+|------|------|
+| Vue 3 | Composition API + `<script setup>` |
+| TypeScript | 类型安全 |
+| Konva.js | Canvas 绘图引擎 |
+| Pinia | 状态管理 |
+| Vue Router | 路由管理 |
+| Vite | 构建工具 |
+| localStorage | 数据持久化 |
+
+## 快速开始
+
+```bash
+# 安装依赖
+npm install
+
+# 启动开发服务器
+npm run dev
+
+# 构建生产版本
+npm run build
+```
+
+启动后访问 http://localhost:5173/ 即可使用。
+
+## 数据存储
+
+当前使用 `localStorage` 持久化所有数据（图片和标注），分为两个数组通过 `imageId` 关联：
+
+- 图片列表：记录图片路径、名称、分类等
+- 标注列表：记录标注坐标、答案、严重程度等，通过 `imageId` 关联对应图片
+
+后续上线前可替换为 JSON 文件或后端 API。
+
+## 项目结构
+
+```
+src/
+├── components/
+│   └── ImageCanvas/     # 画布组件（Konva 绘图）
+├── stores/
+│   └── practice.ts      # 状态管理（图片/标注 CRUD）
+├── utils/
+│   └── iou.ts           # IoU 计算工具
+├── views/
+│   ├── Practice/        # 答题页面
+│   ├── Admin/           # 管理页面
+│   └── ...
+├── types/               # TypeScript 类型定义
+└── router/              # 路由配置
+```
+
+## IoU 匹配
+
+系统使用圆形 IoU（Intersection over Union）算法判断用户标注是否与预设标注匹配，默认阈值为 `0.5`。
+
+```
+IoU = 交集面积 / 并集面积
+IoU >= 0.5 → 命中（HIT）
+IoU < 0.5  → 未命中（MISS）
+```
