@@ -1,0 +1,82 @@
+
+---
+
+## 修改清单
+
+### 1. localStorage 持久化
+- `annotationList` 和 `imageList` 初始化时从 `localStorage` 读取
+- 任何增删操作后自动保存到 `localStorage`
+- 数据结构保持不变
+
+### 2. 本地上传图片
+- 管理后台加 `<input type="file" accept="image/*">`
+- 选择后用 `URL.createObjectURL(file)` 生成预览地址
+- 同时存入 `imageList`，并保存到 `localStorage`
+- 图片二进制用 IndexedDB 存（可选，先不做也行，刷新后重新上传）
+
+### 3. 矩形框 + 内切圆交互
+- 鼠标按下：记录起点，显示矩形（绿色虚线，`strokeDashArray: [5,5]`）
+- 拖拽中：矩形右下角跟随鼠标，矩形内部实时绘制内切正圆（红色实线）
+- 圆取矩形**短边**为直径，居中内切
+- 鼠标松开：移除矩形，保留圆，弹出标注表单
+
+---
+
+## 关键代码提示
+
+```typescript
+// 矩形 + 内切圆绘制
+const drawPreview = (pointer: {x: number, y: number}) => {
+  const width = Math.abs(pointer.x - startPoint.x);
+  const height = Math.abs(pointer.y - startPoint.y);
+  
+  // 矩形（绿色虚线）
+  rect.set({
+    left: Math.min(pointer.x, startPoint.x),
+    top: Math.min(pointer.y, startPoint.y),
+    width,
+    height,
+    visible: true,
+  });
+  
+  // 内切圆（红色实线），取短边
+  const diameter = Math.min(width, height);
+  const radius = diameter / 2;
+  const centerX = (startPoint.x + pointer.x) / 2;
+  const centerY = (startPoint.y + pointer.y) / 2;
+  
+  circle.set({
+    left: centerX,
+    top: centerY,
+    radius,
+    visible: true,
+  });
+  
+  canvas.renderAll();
+};
+
+// 松开时
+const finishDraw = () => {
+  rect.set({ visible: false });  // 隐藏矩形
+  // circle 保留，弹出表单
+};
+```
+
+---
+
+## 数据结构不变
+
+```typescript
+// 保存的还是圆坐标
+{
+  shape: 'circle',
+  coords: { x, y, radius },  // 圆心 + 半径
+}
+```
+
+矩形只是**视觉辅助**，不存储。
+
+---
+
+请让 Claude Code 按这个清单执行。
+

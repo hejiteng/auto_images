@@ -1,0 +1,114 @@
+User: 换一下吧
+Kimi: 好的，换 Konva。
+
+## 让 Claude Code 执行
+
+发送这段：
+
+> 请将项目从 Fabric.js 迁移到 Konva，解决 Vite 兼容性问题：
+>
+> 1. **卸载 Fabric，安装 Konva**：
+>    ```bash
+>    npm uninstall fabric
+>    npm install konva
+>    ```
+>
+> 2. **全局替换 Fabric API 为 Konva API**：
+>
+>    | Fabric.js | Konva |
+>    |-----------|-------|
+>    | `new fabric.Canvas(el)` | `new Konva.Stage({ container: el, width, height })` + `new Konva.Layer()` |
+>    | `fabric.Image.fromURL(url, cb)` | `Konva.Image` + `new Image()` 加载 |
+>    | `new fabric.Circle({...})` | `new Konva.Circle({...})` |
+>    | `new fabric.Rect({...})` | `new Konva.Rect({...})` |
+>    | `new fabric.Text({...})` | `new Konva.Text({...})` |
+>    | `canvas.add(obj)` | `layer.add(obj)` |
+>    | `canvas.remove(obj)` | `obj.destroy()` 或 `layer.remove(obj)` |
+>    | `canvas.renderAll()` | `layer.batchDraw()` 或 `layer.draw()` |
+>    | `canvas.setDimensions({w,h})` | `stage.size({ width, height })` |
+>    | `canvas.setBackgroundImage(img, cb)` | `layer.add(new Konva.Image({ image: img, ... }))` |
+>    | `canvas.getPointer(e)` | `stage.getPointerPosition()` |
+>    | `canvas.getWidth()` / `getHeight()` | `stage.width()` / `stage.height()` |
+>    | `canvas.clear()` | `layer.destroyChildren()` |
+>    | `canvas.dispose()` | `stage.destroy()` |
+>    | `obj.set({ key: val })` | `obj.setAttr('key', val)` 或 `obj.key(val)` |
+>    | `obj.get('key')` | `obj.getAttr('key')` 或 `obj.key()` |
+>
+> 3. **事件绑定调整**：
+>    - Fabric: `canvas.on('mouse:down', fn)`
+>    - Konva: `stage.on('mousedown', fn)` / `layer.on('mousedown', fn)`
+>    - 获取坐标：`stage.getPointerPosition()`
+>
+> 4. **特别注意**：
+>    - Konva 需要 `container` 是 div 元素，不是 canvas 元素
+>    - 修改 `ImageCanvas` 组件的模板：`<div ref="containerEl"></div>` 代替 `<canvas ref="canvasEl"></canvas>`
+>    - 背景图用 `Konva.Image` 添加到最底层
+>
+> 5. **画圈交互保持原逻辑**：
+>    - 鼠标按下：记录起点，创建矩形（绿色虚线）+ 圆（红色实线）
+>    - 拖拽：更新矩形和圆的尺寸
+>    - 松开：隐藏矩形，保留圆，触发 `annotation-added` 事件
+>
+> 6. **确认所有文件都改完**：
+>    - `src/components/ImageCanvas/index.vue`
+>    - 任何其他使用 fabric 的文件
+>
+> 7. **清缓存重启**：
+>    ```bash
+>    rm -rf node_modules/.vite
+>    npm run dev
+>    ```
+>
+> 请确保迁移后功能完全一致：画圈、矩形预览、预设标注显示、删除、模式切换都正常。
+
+---
+
+## 关键差异提醒
+
+**模板变化**：
+```vue
+<!-- 之前 -->
+<canvas ref="canvasEl"></canvas>
+
+<!-- 之后 -->
+<div ref="containerEl" class="canvas-container"></div>
+```
+
+**初始化变化**：
+```javascript
+// 之前
+canvas = new fabric.Canvas(canvasEl.value)
+
+// 之后
+const stage = new Konva.Stage({
+  container: containerEl.value,
+  width: 800,
+  height: 400,
+})
+const layer = new Konva.Layer()
+stage.add(layer)
+```
+
+**背景图变化**：
+```javascript
+// 之前
+fabric.Image.fromURL(url, (img) => {
+  canvas.setBackgroundImage(img, ...)
+})
+
+// 之后
+const imageObj = new Image()
+imageObj.src = url
+imageObj.onload = () => {
+  const konvaImg = new Konva.Image({
+    image: imageObj,
+    width: w,
+    height: h,
+  })
+  layer.add(konvaImg)
+  layer.draw()
+}
+```
+
+让 Claude Code 按这个执行，完成后测试。
+
