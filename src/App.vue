@@ -1,23 +1,16 @@
 <script setup lang="ts">
-import { useRouter, useRoute } from 'vue-router'
+import { useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/user'
 
 const router = useRouter()
-const route = useRoute()
 const userStore = useUserStore()
 </script>
 
 <template>
   <div class="app-layout">
     <div class="top-nav">
-      <router-link to="/dashboard" class="nav-link">首页</router-link>
+      <button class="nav-btn-home" @click="router.push('/dashboard')">首页</button>
       <div class="nav-buttons">
-        <button :class="['nav-btn', { active: route.path === '/practice' }]" @click="router.push('/practice')">
-          答题模式
-        </button>
-        <button :class="['nav-btn', { active: route.path === '/admin' }]" @click="router.push('/admin')">
-          管理模式
-        </button>
         <el-switch
           v-model="userStore.isAdminMode"
           active-text="Admin"
@@ -47,37 +40,25 @@ const userStore = useUserStore()
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
-.nav-link {
-  font-size: 18px;
-  font-weight: bold;
-  color: #333;
-  text-decoration: none;
-}
-
 .nav-buttons {
   display: flex;
   gap: 8px;
   align-items: center;
 }
 
-.nav-btn {
+.nav-btn-home {
   padding: 8px 20px;
-  border: 2px solid #ddd;
+  border: 2px solid #409eff;
   border-radius: 6px;
   background: #fff;
   cursor: pointer;
-  font-size: 14px;
-  color: #666;
+  font-size: 15px;
+  font-weight: 600;
+  color: #409eff;
   transition: all 0.2s;
 
   &:hover {
-    border-color: #409eff;
-    color: #409eff;
-  }
-
-  &.active {
     background: #409eff;
-    border-color: #409eff;
     color: #fff;
   }
 }

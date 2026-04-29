@@ -15,3 +15,9 @@ export const getRandomImage = (params: {
   project?: string
   difficulty?: string
 }) => request.get('/images/random', { params })
+
+export const uploadImage = (formData: FormData) =>
+  request.post('/images', formData, { headers: { 'Content-Type': 'multipart/form-data' } })
+
+export const deleteImage = (id: string) =>
+  request.delete(`/images/${id}`)

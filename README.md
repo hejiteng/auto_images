@@ -54,7 +54,32 @@ npm run build
 - 图片列表：记录图片路径、名称、分类等
 - 标注列表：记录标注坐标、答案、严重程度等，通过 `imageId` 关联对应图片
 
-后续上线前可替换为 JSON 文件或后端 API。
+## 后端 API
+
+后端预留 6 个接口，通过环境变量切换数据源：
+
+| # | 接口 | 说明 |
+|---|------|------|
+| 1 | `GET /api/images` | 获取图片列表，支持 `?projectName=&category=&difficulty=` 筛选 |
+| 2 | `POST /api/images` | 上传图片（FormData），返回 `{ id, url, ... }` |
+| 3 | `DELETE /api/images/:id` | 删除图片 |
+| 4 | `GET /api/annotations?imageId=xxx` | 获取某张图的所有标注（管理模式用） |
+| 5 | `POST /api/annotations` | 保存新标注（画圈+答案+严重程度+解释） |
+| 6 | `POST /api/practice/submit` | 提交答题，前端计算 IoU，后端仅存储 `{ imageId, annotations, score, duration }` |
+
+### 环境变量
+
+| 文件 | 说明 |
+|------|------|
+| `.env.development` | `VITE_API_BASE_URL=http://localhost:3000/api` |
+| `.env.production` | `VITE_API_BASE_URL=https://api.yourdomain.com/api` |
+
+前端调用通过 `src/utils/request.ts` 统一封装，`baseURL` 从环境变量读取，默认 fallback 为 `/api`。
+
+### 关键设计
+
+- **答题模式不获取预设标注**：防止用户提前看到答案，仅在前端本地进行 IoU 匹配计算
+- **提交时只提交用户画的圈坐标**：得分由前端计算，后端仅做数据持久化
 
 ## 项目结构
 

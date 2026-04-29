@@ -1,8 +1,11 @@
 import request from '@/utils/request'
+import type { UserAnnotation } from '@/types/annotation'
 
-export const getHistory = (params: {
-  page: number
-  pageSize: number
-}) => request.get('/records', { params })
+export const submitAnswer = (data: {
+  imageId: string
+  annotations: UserAnnotation[]
+  duration: number
+}) => request.post('/practice/submit', data)
 
-export const getStats = () => request.get('/records/stats')
+export const getPracticeResult = (recordId: string) =>
+  request.get(`/practice/result/${recordId}`)
