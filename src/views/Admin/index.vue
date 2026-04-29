@@ -26,6 +26,7 @@ const severityMap = { minor: '轻微', major: '严重', critical: '致命' }
 
 function loadImages() {
   images.value = store.getAllImages()
+  console.log('[admin] loadImages:', images.value.map(i => ({ id: i.id, name: i.projectName })))
   if (images.value.length > 0 && !currentAdminImage.value) {
     selectImage(images.value[0])
   }
@@ -34,6 +35,7 @@ function loadImages() {
 function selectImage(image: ImageItem) {
   currentAdminImage.value = image
   adminAnnotations.value = store.getAnnotationsForImage(image.id)
+  console.log('[admin] selectImage:', image.id, 'annotations:', adminAnnotations.value)
 }
 
 async function handleFileUpload(event: Event) {

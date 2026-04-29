@@ -26,6 +26,15 @@ const defaultImages: ImageItem[] = [
     uploadTime: new Date().toISOString(),
     annotationCount: 1,
   },
+    {
+    id: 'img3',
+    url: '/images/手持电话.jpeg',
+    projectName: '本地练习',
+    category: '安全',
+    difficulty: 'medium',
+    uploadTime: new Date().toISOString(),
+    annotationCount: 1,
+  },
 ]
 
 const defaultAnnotations: Annotation[] = [
@@ -49,6 +58,16 @@ const defaultAnnotations: Annotation[] = [
     severity: 'minor',
     explanation: '已完成部分应采取覆盖、包裹等保护措施。',
   },
+  {
+    id: 'preset-3',
+    imageId: 'img3',
+    shape: 'circle',
+    coords: { x: 0.31, y: 0.22, radius: 0.1 },
+    answer: '开车时拨打手持电话',
+    category: '安全',
+    severity: 'minor',
+    explanation: '开车时禁止拨打手持电话。',
+  },
 ]
 
 function loadImages(): ImageItem[] {
@@ -59,6 +78,15 @@ function loadImages(): ImageItem[] {
     // 过滤掉 blob URL（页面刷新后失效）
     const valid = parsed.filter((img) => !img.url.startsWith('blob:'))
     if (valid.length === 0) return defaultImages
+
+    // 合并 defaultImages 中新增的图片
+    const existingIds = new Set(valid.map((img) => img.id))
+    for (const def of defaultImages) {
+      if (!existingIds.has(def.id)) {
+        valid.push(def)
+      }
+    }
+
     // 清理关联的失效标注
     const validIds = new Set(valid.map((img) => img.id))
     const annotations = loadAnnotations()
@@ -78,7 +106,17 @@ function loadImages(): ImageItem[] {
 function loadAnnotations(): Annotation[] {
   try {
     const data = localStorage.getItem(STORAGE_KEY_ANNOTATIONS)
-    return data ? JSON.parse(data) : defaultAnnotations
+    if (!data) return defaultAnnotations
+    const parsed: Annotation[] = JSON.parse(data)
+
+    // 合并 defaultAnnotations 中新增的标注
+    const existingIds = new Set(parsed.map((a) => a.id))
+    for (const def of defaultAnnotations) {
+      if (!existingIds.has(def.id)) {
+        parsed.push(def)
+      }
+    }
+    return parsed
   } catch {
     return defaultAnnotations
   }

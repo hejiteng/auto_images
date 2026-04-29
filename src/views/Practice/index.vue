@@ -17,8 +17,6 @@ onUnmounted(() => {
 })
 
 const handleSubmit = () => {
-  const annotations = canvasRef.value?.getAnnotations() || []
-  practiceStore.userAnnotations = annotations
   canvasRef.value?.showResults(practiceStore.presetAnnotations, 0.5)
   practiceStore.doSubmit()
 }
@@ -54,7 +52,7 @@ const formatTime = (seconds: number) => {
         mode="practice"
         :preset-annotations="practiceStore.presetAnnotations"
         :debug="true"
-        @annotation-added="() => {}"
+        @annotation-added="(ann: any) => practiceStore.addAnnotation(ann as any)"
       />
       <div v-else class="loading">
         <p>加载中...</p>

@@ -56,10 +56,38 @@ function drawPresetAnnotations(annotations: Annotation[], w: number, h: number) 
 
     const objects: Konva.Node[] = [circle]
 
+    // 坐标标签：始终显示，白底黑字
+    const coordText = `x:${(coords as any).x?.toFixed(2)} y:${(coords as any).y?.toFixed(2)}`
+    const coordLabel = new Konva.Text({
+      x: coords.x * w,
+      y: coords.y * h - (coords as any).radius * w - 18,
+      text: coordText,
+      fontSize: 12,
+      fill: '#333',
+      align: 'center',
+    })
+    ;(coordLabel as any).annotationId = ann.id
+    layer.add(coordLabel)
+    objects.push(coordLabel)
+
+    // 坐标标签白底
+    const coordBg = new Konva.Rect({
+      x: (coordLabel as any).x() - 4,
+      y: (coordLabel as any).y() - 2,
+      width: (coordLabel as any).width() + 8,
+      height: (coordLabel as any).height() + 4,
+      fill: 'rgba(255,255,255,0.9)',
+      cornerRadius: 3,
+    })
+    ;(coordBg as any).annotationId = ann.id
+    layer.add(coordBg)
+    coordLabel.moveToTop()
+    objects.unshift(coordBg)
+
     if (props.debug) {
       const label = new Konva.Text({
         x: coords.x * w,
-        y: coords.y * h - coords.radius * w - 16,
+        y: coords.y * h - (coords as any).radius * w - 36,
         text: ann.answer,
         fontSize: 12,
         fill: '#4caf50',
@@ -430,12 +458,39 @@ function confirmAnnotation(annotationId: string, annotation: Annotation) {
 
   const objects: Konva.Node[] = [lastDrawnCircle]
 
-  // Add debug label
+  // 坐标标签：始终显示
+  const coords = annotation.coords as CircleCoords
+  const coordText = `x:${coords.x.toFixed(2)} y:${coords.y.toFixed(2)}`
+  const coordLabel = new Konva.Text({
+    x: coords.x * imgW,
+    y: coords.y * imgH - coords.radius * imgW - 18,
+    text: coordText,
+    fontSize: 12,
+    fill: '#333',
+    align: 'center',
+  })
+  ;(coordLabel as any).annotationId = annotationId
+  layer.add(coordLabel)
+
+  const coordBg = new Konva.Rect({
+    x: (coordLabel as any).x() - 4,
+    y: (coordLabel as any).y() - 2,
+    width: (coordLabel as any).width() + 8,
+    height: (coordLabel as any).height() + 4,
+    fill: 'rgba(255,255,255,0.9)',
+    cornerRadius: 3,
+  })
+  ;(coordBg as any).annotationId = annotationId
+  layer.add(coordBg)
+  coordLabel.moveToTop()
+  objects.unshift(coordBg)
+  objects.push(coordLabel)
+
+  // 答案标签：debug 模式显示
   if (props.debug) {
-    const coords = annotation.coords as CircleCoords
     const label = new Konva.Text({
       x: coords.x * imgW,
-      y: coords.y * imgH - coords.radius * imgW - 16,
+      y: coords.y * imgH - coords.radius * imgW - 36,
       text: annotation.answer,
       fontSize: 12,
       fill: '#4caf50',
