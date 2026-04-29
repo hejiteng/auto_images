@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import { useRouter, useRoute } from 'vue-router'
+import { useUserStore } from '@/stores/user'
 
 const router = useRouter()
 const route = useRoute()
+const userStore = useUserStore()
 </script>
 
 <template>
@@ -16,6 +18,12 @@ const route = useRoute()
         <button :class="['nav-btn', { active: route.path === '/admin' }]" @click="router.push('/admin')">
           管理模式
         </button>
+        <el-switch
+          v-model="userStore.isAdminMode"
+          active-text="Admin"
+          inactive-text="普通"
+          class="admin-switch"
+        />
       </div>
     </div>
     <div class="page-content">
@@ -49,6 +57,7 @@ const route = useRoute()
 .nav-buttons {
   display: flex;
   gap: 8px;
+  align-items: center;
 }
 
 .nav-btn {
@@ -71,6 +80,10 @@ const route = useRoute()
     border-color: #409eff;
     color: #fff;
   }
+}
+
+.admin-switch {
+  margin-left: 12px;
 }
 
 .page-content {

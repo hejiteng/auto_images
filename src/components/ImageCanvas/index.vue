@@ -503,11 +503,6 @@ function confirmAnnotation(annotationId: string, annotation: Annotation) {
 
   presetCircleObjects[annotationId] = objects
 
-  console.log('confirmAnnotation:', {
-    id: annotationId,
-    objectsCount: objects.length,
-    objects: objects.map((o: any) => ({ type: o.getClassName(), annotationId: o.annotationId })),
-  })
 
   lastDrawnCircle = null
   layer.batchDraw()
@@ -525,7 +520,6 @@ function removePresetAnnotation(id: string) {
   }
   delete presetCircleObjects[id]
   layer.batchDraw()
-  console.log('removePresetAnnotation:', { id, removedCount: objects.length, remainingIds: Object.keys(presetCircleObjects) })
 }
 
 defineExpose({ undo, clearAll, getAnnotations, showResults, confirmAnnotation, removePresetAnnotation })

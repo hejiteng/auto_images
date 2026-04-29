@@ -1,4 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import { useUserStore } from '@/stores/user'
+import { ElMessage } from 'element-plus'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -11,6 +13,19 @@ const router = createRouter({
     { path: '/upload', component: () => import('@/views/Upload/index.vue') },
     { path: '/admin', component: () => import('@/views/Admin/index.vue') },
   ],
+})
+
+router.beforeEach((to, _from, next) => {
+  if (to.path === '/admin') {
+    const userStore = useUserStore()
+    if (!userStore.isAdminMode) {
+      ElMessage.warning('无权限，请先切换 Admin 模式')
+      // TODO: 正式上线时可改为跳转登录页或弹密码框
+      next(false)
+      return
+    }
+  }
+  next()
 })
 
 export default router
